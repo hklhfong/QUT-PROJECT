@@ -1,0 +1,648 @@
+
+#-----Statement of Authorship----------------------------------------#
+#
+#  This is an individual assessment item.  By submitting this
+#  code I agree that it represents my own work.  I am aware of
+#  the University rule that a student must not act in a manner
+#  which constitutes academic dishonesty as stated and explained
+#  in QUT's Manual of Policies and Procedures, Section C/5.3
+#  "Academic Integrity" and Section E/2.1 "Student Code of Conduct".
+#
+#    Student no: n10107321
+#    Student name: Law Ho Fong,Ken
+#
+#  NB: Files submitted without a completed copy of this statement
+#  will not be marked.  All files submitted will be subjected to
+#  software plagiarism analysis using the MoSS system
+#  (http://theory.stanford.edu/~aiken/moss/)[3PT7102].
+#
+#--------------------------------------------------------------------#
+
+
+
+#-----Assignment Description-----------------------------------------#
+#
+#  BILLBOARD
+#
+#  This assignment tests your skills at defining functions, processing
+#  data stored in lists and performing the arithmetic calculations
+#  necessary to display a complex visual image.  The incomplete
+#  Python script below is missing a crucial function, "paste_up".
+#  You are required to complete this function so that when the
+#  program is run it produces an image of an advertising billboard
+#  whose arrangement is determined by data stored in a list which
+#  specifies how individual paper sheets are to be pasted onto the
+#  backing.  See the instruction sheet accompanying this file for
+#  full details.
+#
+#--------------------------------------------------------------------#  
+
+
+
+#-----Preamble-------------------------------------------------------#
+#
+# This section imports necessary functions and defines constant
+# values used for creating the drawing canvas.  You should not change
+# any of the code in this section.
+#
+
+# Import the functions needed to complete this assignment.  You
+# should not need to use any other modules for your solution.
+
+from turtle import *
+from math import *
+
+# Define constant values used in the main program that sets up
+# the drawing canvas.  Do not change any of these values.
+
+sheet_width = 200 # pixels
+sheet_height = 500 # pixels
+backing_margin = 20 # pixels
+backing_width = sheet_width * 4 + backing_margin * 2
+backing_height = sheet_height + backing_margin * 2
+canvas_top_and_bottom_border = 150 # pixels
+canvas_left_and_right_border = 300 # pixels
+canvas_width = (backing_width + canvas_left_and_right_border)
+canvas_height = (backing_height + canvas_top_and_bottom_border)
+
+#
+#--------------------------------------------------------------------#
+
+
+
+#-----Functions for Creating the Drawing Canvas----------------------#
+#
+# The functions in this section are called by the main program to
+# set up the drawing canvas for your image.  You should not change
+# any of the code in this section.
+#
+
+# Set up the canvas and draw the background for the overall image
+def create_drawing_canvas(mark_centre_points = True):
+
+    # Set up the drawing canvas
+    setup(canvas_width, canvas_height)
+
+    # Draw as fast as possible
+    tracer(False)
+
+    # Colour the sky blue
+    bgcolor('sky blue')
+
+    # Draw the ground as a big green rectangle (sticking out of the
+    # bottom edge of the drawing canvas slightly)
+    overlap = 5 # pixels
+    grass_height = 100 # pixels
+    penup()
+    goto(-(canvas_width // 2 + overlap),
+         -(canvas_height // 2 + overlap)) # start at the bottom-left
+    fillcolor('pale green')
+    begin_fill()
+    setheading(90) # face north
+    forward(grass_height + overlap)
+    right(90) # face east
+    forward(canvas_width + overlap * 2)
+    right(90) # face south
+    forward(grass_height + overlap)
+    end_fill()
+
+    # Draw a nice warm sun peeking into the image
+    penup()
+    goto(-canvas_width // 2, canvas_height // 2)
+    color('yellow')
+    dot(350)
+
+    # Draw a big fluffy white cloud in the sky
+    goto(canvas_width // 3, canvas_height // 3)
+    color('white')
+    dot(200)
+    setheading(200)
+    forward(100)
+    dot(180)
+    setheading(0)
+    forward(200)
+    dot(160)
+
+    # Draw the billboard's wooden backing as four frames
+    # and some highlighted coordinates
+    #
+    # Outer rectangle
+    goto(- backing_width // 2, - backing_height // 2) # bottom left
+    pencolor('sienna'); fillcolor('tan'); width(3)
+    begin_fill()
+    pendown()
+    setheading(90) # face north
+    forward(backing_height)
+    right(90) # face east
+    forward(backing_width)
+    right(90) # face south
+    forward(backing_height)
+    right(90) # face west
+    forward(backing_width)
+    end_fill()
+
+    # Inner rectangle
+    penup()
+    goto(- backing_width // 2 + backing_margin,
+         - backing_height // 2 + backing_margin) # bottom left
+    fillcolor('gainsboro')
+    begin_fill()
+    pendown()
+    setheading(90) # face north
+    forward(backing_height - backing_margin * 2)
+    right(90) # face east
+    forward(backing_width - backing_margin * 2)
+    right(90) # face south
+    forward(backing_height - backing_margin * 2)
+    right(90) # face west
+    forward(backing_width - backing_margin * 2)
+    end_fill()
+
+    # Draw lines separating the locations where the sheets go
+    width(1); pencolor('dim grey')
+    for horizontal in [-sheet_width, 0, sheet_width]:
+        penup()
+        goto(horizontal, sheet_height // 2)
+        pendown()
+        setheading(270) # point south
+        forward(sheet_height)
+         
+    # Mark the centre points of each sheet's location, if desired
+    if mark_centre_points:
+        penup()
+        points = [[[round(-sheet_width * 1.5), 0], 'Location 1'],
+                  [[round(-sheet_width * 0.5), 0], 'Location 2'],
+                  [[round(sheet_width * 0.5), 0], 'Location 3'],
+                  [[round(sheet_width * 1.5), 0], 'Location 4']]
+        for centre_point, label in points:
+            goto(centre_point)
+            dot(4)
+            write('  ' + label + '\n  (' + str(centre_point[0]) + ', 0)',
+                  font = ('Arial', 12, 'normal'))
+     
+    # Reset everything ready for the student's solution
+    color('black')
+    width(1)
+    penup()
+    home()
+    setheading(0)
+    tracer(True)
+
+
+# End the program by hiding the cursor and releasing the canvas
+def release_drawing_canvas():
+    tracer(True)
+    hideturtle()
+    done()
+    
+#
+#--------------------------------------------------------------------#
+
+
+
+#-----Test Data------------------------------------------------------#
+#
+# The list in this section contains the data sets you will use to
+# test your code.  Each of the data sets is a list specifying the
+# way in which sheets are pasted onto the billboard:
+#
+# 1. The name of the sheet, from 'Sheet A' to 'Sheet D'
+# 2. The location to paste the sheet, from 'Location 1' to
+#    'Location 4'
+# 3. The sheet's orientation, either 'Upright' or 'Upside down'
+#
+# Each data set does not necessarily mention all four sheets.
+#
+# You can create further data sets, but do not change any of the
+# given ones below because they will be used to test your submission.
+#
+# Note that your solution must work for all the data sets below
+# AND ANY OTHER DATA SETS IN THE SAME FORMAT!
+#
+
+data_sets = [
+    # This first data set don't put any sheets on the billboard
+    # Data set 0
+    [],                                             # data_sets[0]
+    # These data sets put Sheet A in all possible locations and orientations
+    # Data sets 1 - 8
+    [['Sheet A', 'Location 1', 'Upright']],         # data_sets[1]
+    [['Sheet A', 'Location 2', 'Upright']],         # data_sets[2]
+    [['Sheet A', 'Location 3', 'Upright']],         # data_sets[3]
+    [['Sheet A', 'Location 4', 'Upright']],         # data_sets[4]
+    [['Sheet A', 'Location 1', 'Upside down']],     # data_sets[5]
+    [['Sheet A', 'Location 2', 'Upside down']],     # data_sets[6]
+    [['Sheet A', 'Location 3', 'Upside down']],     # data_sets[7]
+    [['Sheet A', 'Location 4', 'Upside down']],     # data_sets[8]
+    # These data sets put Sheet B in all possible locations and orientations
+    # Data sets 9 - 16
+    [['Sheet B', 'Location 1', 'Upright']],         # data_sets[9]
+    [['Sheet B', 'Location 2', 'Upright']],         # data_sets[10]
+    [['Sheet B', 'Location 3', 'Upright']],         # data_sets[11]
+    [['Sheet B', 'Location 4', 'Upright']],         # data_sets[12]
+    [['Sheet B', 'Location 1', 'Upside down']],     # data_sets[13]
+    [['Sheet B', 'Location 2', 'Upside down']],     # data_sets[14]
+    [['Sheet B', 'Location 3', 'Upside down']],     # data_sets[15]
+    [['Sheet B', 'Location 4', 'Upside down']],     # data_sets[16]
+    # These data sets put Sheet C in all possible locations and orientations
+    # Data sets 17 - 24
+    [['Sheet C', 'Location 1', 'Upright']],         # data_sets[17]
+    [['Sheet C', 'Location 2', 'Upright']],         # data_sets[18]
+    [['Sheet C', 'Location 3', 'Upright']],         # data_sets[19]
+    [['Sheet C', 'Location 4', 'Upright']],         # data_sets[20]
+    [['Sheet C', 'Location 1', 'Upside down']],     # data_sets[21]
+    [['Sheet C', 'Location 2', 'Upside down']],     # data_sets[22]
+    [['Sheet C', 'Location 3', 'Upside down']],     # data_sets[23]
+    [['Sheet C', 'Location 4', 'Upside down']],     # data_sets[24]
+    # These data sets put Sheet D in all possible locations and orientations
+    # Data sets 25 - 32
+    [['Sheet D', 'Location 1', 'Upright']],         # data_sets[25]
+    [['Sheet D', 'Location 2', 'Upright']],         # data_sets[26]
+    [['Sheet D', 'Location 3', 'Upright']],         # data_sets[27]
+    [['Sheet D', 'Location 4', 'Upright']],         # data_sets[28]
+    [['Sheet D', 'Location 1', 'Upside down']],     # data_sets[29]
+    [['Sheet D', 'Location 2', 'Upside down']],     # data_sets[30]
+    [['Sheet D', 'Location 3', 'Upside down']],     # data_sets[31]
+    [['Sheet D', 'Location 4', 'Upside down']],     # data_sets[32]
+    # These data sets place two sheets in various locations and orientations
+    # Data sets 33 - 37
+    [['Sheet D', 'Location 2', 'Upright'],
+          ['Sheet C', 'Location 4', 'Upright']],    # data_sets[33]
+    [['Sheet A', 'Location 3', 'Upright'],
+          ['Sheet B', 'Location 1', 'Upright']],    # data_sets[34]
+    [['Sheet D', 'Location 1', 'Upside down'],
+          ['Sheet C', 'Location 4', 'Upright']],    # data_sets[35]
+    [['Sheet A', 'Location 3', 'Upright'],
+          ['Sheet B', 'Location 2', 'Upside down']],# data_sets[36]
+    [['Sheet C', 'Location 1', 'Upright'],
+          ['Sheet B', 'Location 2', 'Upside down']],# data_sets[37]
+    # These data sets place three sheets in various locations and orientations
+    # Data sets 38 - 42
+    [['Sheet A', 'Location 4', 'Upright'],
+          ['Sheet B', 'Location 3', 'Upright'],
+          ['Sheet C', 'Location 2', 'Upright']],    # data_sets[38]
+    [['Sheet C', 'Location 1', 'Upright'],
+          ['Sheet A', 'Location 3', 'Upright'],
+          ['Sheet D', 'Location 4', 'Upright']],    # data_sets[39]
+    [['Sheet C', 'Location 1', 'Upside down'],
+          ['Sheet D', 'Location 3', 'Upside down'],
+          ['Sheet A', 'Location 4', 'Upright']],    # data_sets[40]
+    [['Sheet B', 'Location 4', 'Upright'],
+          ['Sheet D', 'Location 2', 'Upside down'],
+          ['Sheet C', 'Location 1', 'Upside down']],# data_sets[41] 
+    [['Sheet A', 'Location 4', 'Upright'],
+          ['Sheet D', 'Location 3', 'Upside down'],
+          ['Sheet C', 'Location 2', 'Upright']],    # data_sets[42]
+    # These data sets place four sheets in various locations and orientations
+    # Data sets 43 - 47
+    [['Sheet C', 'Location 1', 'Upright'],
+          ['Sheet B', 'Location 2', 'Upright'],
+          ['Sheet A', 'Location 3', 'Upright'],
+          ['Sheet D', 'Location 4', 'Upright']],    # data_sets[43]
+    [['Sheet C', 'Location 2', 'Upright'],
+          ['Sheet B', 'Location 3', 'Upright'],
+          ['Sheet D', 'Location 1', 'Upright'],
+          ['Sheet A', 'Location 4', 'Upright']],    # data_sets[44]
+    [['Sheet C', 'Location 1', 'Upside down'],
+          ['Sheet B', 'Location 2', 'Upright'],
+          ['Sheet A', 'Location 3', 'Upright'],
+          ['Sheet D', 'Location 4', 'Upside down']],# data_sets[45]
+    [['Sheet C', 'Location 2', 'Upright'],
+          ['Sheet B', 'Location 3', 'Upside down'],
+          ['Sheet D', 'Location 1', 'Upside down'],
+          ['Sheet A', 'Location 4', 'Upright']],    # data_sets[46]
+    [['Sheet C', 'Location 1', 'Upright'],
+          ['Sheet B', 'Location 2', 'Upside down'],
+          ['Sheet A', 'Location 3', 'Upright'],
+          ['Sheet D', 'Location 4', 'Upside down']],# data_sets[47]     
+    # This data set draws the entire image upside down
+    # Data set 48
+    [['Sheet A', 'Location 4', 'Upside down'],
+          ['Sheet B', 'Location 3', 'Upside down'],
+          ['Sheet C', 'Location 2', 'Upside down'],
+          ['Sheet D', 'Location 1', 'Upside down']],# data_sets[48]
+    # This is the final, 'correct' arrangement of sheets
+    # Data set 49
+    [['Sheet A', 'Location 1', 'Upright'],
+          ['Sheet B', 'Location 2', 'Upright'],
+          ['Sheet C', 'Location 3', 'Upright'],
+          ['Sheet D', 'Location 4', 'Upright']]     # data_sets[49]
+    ]
+
+#
+#--------------------------------------------------------------------#
+
+
+
+#-----Student's Solution---------------------------------------------#
+#
+#  Complete the assignment by replacing the dummy function below with
+#  your own "paste_up" function.
+#
+
+# Paste the sheets onto the billboard as per the provided data set
+
+# Creat a function that can be fill the background color of the billboard
+def fill_the_background(bd_color):
+    color(bd_color)
+    begin_fill()
+    right(90)
+    forward(sheet_height)
+    left(90)
+    forward(sheet_width)
+    left(90)
+    forward(sheet_height)
+    left(90)
+    forward(sheet_width)
+    end_fill()
+    left(90)
+
+# Creat a function that can be draw android left hand
+def Draw_sheetA():
+    # Drawing wordA
+    forward(100)
+    left(90)
+    forward(120)
+    pendown()
+    color('black')
+    pensize(10)
+    left(90)
+    forward(50)
+    left(90)
+    forward(20)
+    circle(25,180)
+    penup()
+    forward(40)
+    # Drawing word N
+    pendown()
+    left(90)
+    forward(25)
+    circle(-25,90)
+    forward(5)
+    circle(-25,90)
+    forward(25)
+    penup()
+    # Set the start position of left hand
+    forward(250)
+    left(90)
+    backward(50)
+    # Start drawing the left hand of android with red color
+    pendown()
+    left(135)
+    pensize(20)
+    color('green')
+    circle(50,180)
+    left(90)
+    forward(100)
+    left(90)
+    pensize(1)
+    color('red')
+    begin_fill()
+    circle(50,180)
+    left(90)
+    forward(100)
+    end_fill()
+
+# Creat a function that can be draw android left face
+def Draw_sheetB():
+    # Drawing the word D
+    color('black')
+    pensize(10)
+    forward(100)
+    left(90)
+    pendown()
+    forward(30)
+    circle(10,90)
+    forward(30)
+    circle(10,90)
+    forward(30)
+    left(180)
+    penup()
+    forward(60)
+    # Drawing the word R
+    pendown()
+    forward(30)
+    circle(-5,90)
+    forward(7)
+    circle(-5,90)
+    forward(30)
+    backward(30)
+    left(180)
+    circle(-5,90)
+    forward(30)
+    left(90)
+    penup()
+    # Drawing the word O
+    forward(45)
+    pendown()
+    circle(25)
+    penup()
+    # Drawing the word I
+    forward(45)
+    pendown()
+    left(90)
+    forward(50)
+    penup()
+    # Set the start position of left face
+    backward(150)
+    left(90)
+    pendown()
+    # Start drawing the left face of android with green color
+    color('green')
+    pensize(25)
+    begin_fill()
+    circle(180,35)
+    right(90)
+    forward(80)
+    backward(80)
+    left(90)
+    circle(180,55)
+    left(90)
+    forward(180)
+    end_fill()
+    penup()
+    left(90)
+    forward(200)
+    backward(100)
+    left(90)
+    forward(70)
+    pendown()
+    color("white")
+    circle(10)
+
+# Creat a function that can be draw android right face
+def Draw_sheetC():
+    # Drawing the word D
+    color('black')
+    pensize(10)
+    forward(50)
+    left(90)
+    pendown()
+    forward(30)
+    circle(-10,90)
+    forward(30)
+    circle(-10,90)
+    forward(30)
+    penup()
+    # Set the start position of right face 
+    left(90)
+    pensize(25)
+    color('green')
+    forward(282)
+    left(90)
+    pendown()
+    forward(190)
+    left(90)
+    pendown()
+    # Start drawing the right face of android without color fill
+    circle(180,55)
+    right(90)
+    forward(80)
+    backward(80)
+    left(90)
+    circle(180,35)
+    left(90)
+    penup()
+    forward(180)
+    pendown()
+    left(90)
+    forward(180)
+    penup()
+    backward(105)
+    left(90)
+    forward(90)
+    pendown()
+    circle(10)
+
+# Creat a function that can be draw android right hand
+def Draw_sheetD():
+    # Set the right hand position
+    forward(480)
+    left(90)
+    forward(80)
+    pendown()
+    # Start drawing the right hand of android with blue color
+    left(45)
+    pensize(20)
+    color('green')
+    forward(140)
+    circle(50,180)
+    forward(140)
+    left(90)
+    forward(100)
+    left(90)
+    pensize(1)
+    color('blue')
+    forward(140)
+    begin_fill()
+    circle(50,180)
+    forward(140)
+    left(90)
+    forward(100)
+    end_fill()
+               
+# Draw the billboard base on the choosen set.
+def paste_up(inside_set):
+    # Read inside of choosen set and analys each row.
+    for row_of_inside_set in inside_set:
+            # First, if the second column of inside set is equal to one of the locations,
+            # put turtle on that point.
+            # Then, if the third column of the inside set is equal to one of the orientations,
+            # set the heading to correct direction.
+            penup()
+            if row_of_inside_set[1] == 'Location 1':
+                setpos(-400,250)
+                if row_of_inside_set[2] == 'Upright':
+                    setheading(0)
+                else:
+                    setpos(-200,-250)
+                    setheading(180)
+        
+            elif row_of_inside_set[1] == 'Location 2':
+                setpos(-200,250)
+                if row_of_inside_set[2] == 'Upright':
+                    setheading(0)
+                else:
+                    setpos(0,-250)
+                    setheading(180)
+                    
+            elif row_of_inside_set[1] == 'Location 3':
+                setpos(0,250)
+                if row_of_inside_set[2] == 'Upright':
+                    setheading(0)
+                else:
+                    setpos(200,-250)
+                    setheading(180)
+                    
+            elif row_of_inside_set[1] == 'Location 4':
+                setpos(200,250)
+                if row_of_inside_set[2] == 'Upright':
+                    setheading(0)
+                else:
+                    setpos(400,-250)
+                    setheading(180)
+
+            # Find out which sheet we need to draw and call the selected sheet function.
+            # Before paint the picture ,call function to fill in background first.
+            if row_of_inside_set[0] == 'Sheet A':
+                fill_the_background("lemonchiffon")
+                Draw_sheetA()
+                
+            elif row_of_inside_set[0] == 'Sheet B':
+                fill_the_background("lemonchiffon")
+                Draw_sheetB()
+                
+            elif row_of_inside_set[0] == 'Sheet C':
+                fill_the_background("lemonchiffon")
+                Draw_sheetC()
+                
+            elif row_of_inside_set[0] == 'Sheet D':
+                fill_the_background("lemonchiffon")
+                Draw_sheetD()
+            
+            
+    
+#
+#--------------------------------------------------------------------#
+
+
+
+#-----Main Program---------------------------------------------------#
+#
+# This main program sets up the background, ready for you to start
+# drawing your billboard.  Do not change any of this code except
+# where indicated by comments marked '*****'.
+#
+
+# Set up the drawing canvas
+# ***** Change the default argument to False if you don't want to
+# ***** display the centre points of each sheet on the backing
+create_drawing_canvas()
+
+# Control the drawing speed
+# ***** Modify the following argument if you want to adjust
+# ***** the drawing speed
+speed('fastest')
+
+# Decide whether or not to show the drawing being done step-by-step
+# ***** Set the following argument to False if you don't want to wait
+# ***** while the cursor moves around the screen
+tracer(True)
+
+# Give the drawing canvas a title
+# ***** Replace this title with one that describes the image
+# ***** displayed on your billboard when the sheets are pasted
+# ***** correctly
+title("Colourful Android")
+
+### Call the student's function to display the billboard
+### ***** Change the number in the argument to this function
+### ***** to test your code with a different data set
+paste_up(data_sets[49])
+
+# Exit gracefully
+release_drawing_canvas()
+
+#
+#--------------------------------------------------------------------#
+
